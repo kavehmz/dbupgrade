@@ -1,0 +1,82 @@
+sudo -H -u postgres /usr/lib/postgresql/9.6/bin/pg_upgrade \
+   -b /usr/lib/postgresql/9.3/bin \
+   -B /usr/lib/postgresql/9.6/bin \
+   -d /var/lib/postgresql/9.3/main \
+   -D /db/9.6/ \
+   -o ' -c config_file=/etc/postgresql/9.3/main/postgresql.conf' \
+   -O ' -c config_file=/etc/postgresql/9.6/main/postgresql.conf' \
+   --jobs 64 --retain
+
+Normal IO
+
+real    102m30.534s
+user    0m1.732s
+sys     21m3.388s
+
+
+
+
+RAM 
+
+real    11m55.377s
+user    0m0.804s
+sys     11m5.736s
+
+RAM --link
+
+real    0m49.983s
+user    0m0.804s
+sys     11m5.736s
+
+
+clientdb upgrade 
+
+All,
+
+I am working on upgrading our clientdb from 9.3 to 9.6.
+
+As 9.3 does not support logical replication we will have some down-time that I will keep minimum.
+
+I used snapshot of CR DB (1TByte).
+
+To achieve faster upgrade we need high IO throughput.
+
+Our normall volumes we are using in our DB have throughput of around 75MB.
+
+But as we need to do our upgrade with minimum downtime we need all the power which amazon can offer, even if it is temporary.
+
+I did setup a 8 element raid array in a i2.8xlarge server ($7/hour). this way I was able to reach 1000MB throughput for our volume.
+
+With that setup and using pg_upgrade with hard-link I was ble to upgrade our CR DB in less than a minute (50s) and make the first replica ready in another server in about 65s.
+
+This is just the day one result.
+We need to be """Very Careful""".
+
+I will spend more time to test the operation. 
+I will automate the opration so I repeat it without mistake.
+First I will do the whole process again on a live non promoted replica that us not in use
+I will also create some sanity checks.
+
+Eventually I will need to pair with DBA team, review the plan again and again and execute it at some point.
+
+My suggested process will be:
+- For CR an VR we create two giant server, one as master (cr-giant01) and one slave (cr-giant02).
+- giant servers will be our sync-slave
+- we promote cr-giant01 to be the main master.
+- we stop all the access to master ans less slave (cr-giant02) to catch up.
+- we upgrade cr-giant01 to 9.3 (50s), using hard-link upgrade.
+- we upgrade our slave to 9.3 (65s), using hard-link sync.
+- we check and bring our operation back (as much as our checkup takes)
+- we recreate extra slaves and a new master without hard-link.
+- we promote the new (no hard-link) master.
+
+
+Other client DB are so small and thier traffic is so low that I think this complex process is not necessary for them.
+
+
+
+
+
+
+
+
