@@ -1,3 +1,4 @@
+#!/bin/bash
 # create_instance name ip-id
 create_instance() {
     echo "creating instance"

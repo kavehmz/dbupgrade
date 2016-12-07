@@ -1,11 +1,13 @@
+#!/bin/bash
 # setup name master_snapshot master
-# setup jp-dbpri01-9.6 upgradetest-jp-dbpri02 jp-dbpri02 jp-dbpri02.regentmarkets.com
+# setup jp-dbpri01-9.6 upgradetest-jp-dbpri02 jp-dbpri02 jp-dbpri02.regentmarkets.com eipalloc-0a44ae34
 setup() {
     DBAME=$1
     MASTERSNAPSHOT=$2
     MASTERCONFIG=$3
     MASTERURL=$4
-    create_instance $DBAME eipalloc-0a44ae34
+    SERVERIP=$5
+    create_instance $DBAME $SERVERIP
     attach_volume 400 io1 20000 $DBAME-disk01 sdf
     attach_volume 400 io1 20000 $DBAME-disk02 sdg
     attach_volume 400 io1 20000 $DBAME-disk03 sdh
