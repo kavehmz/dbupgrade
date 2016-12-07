@@ -11,3 +11,5 @@
 . ./server.sh
 
 setup jp-dbpri01-9.6 upgradetest-jp-dbpri02 jp-dbpri02 jp-dbpri02.regentmarkets.com eipalloc-0a44ae34
+
+setup jp-dbpri02-9.6 upgradetest-jp-dbpri02 jp-dbpri02 jp-dbpri02.regentmarkets.com eipalloc-0a44ae34

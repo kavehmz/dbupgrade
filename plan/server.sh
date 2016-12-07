@@ -45,6 +45,6 @@ setup() {
     scp_config $MASTERCONFIG $MASTERURL
 
     sh "sudo service postgresql restart 9.3"
-
-
+    sh "sudo umount /mnt"
+    detach_replica_volume upgradetest-jp-dbpri02
 }
